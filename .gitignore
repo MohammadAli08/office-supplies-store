@@ -4,7 +4,10 @@
 *.pyc
 __pycache__
 db.sqlite3
-media
+medias/images/*
+!medias/images/profiles/
+medias/images/profiles/*
+!medias/images/profiles/default-avatar.png
 office_supplies_store/settings.py
 
 # Backup files #
