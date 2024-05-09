@@ -1,0 +1,35 @@
+{% extends "shared/base.html" %}
+{% block content %}
+
+
+{% include "shared/messages.html" %}
+<!-- breadcrumbs -->
+<div class="breadcrumbs">
+	<div class="container">
+		<ol class="breadcrumb breadcrumb1 animated wow slideInLeft" data-wow-delay=".5s">
+			<li><a href="index.html"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>خانه</a></li>
+			<li class="active">فعال سازی حساب</li>
+		</ol>
+	</div>
+</div>
+<!-- //breadcrumbs -->
+<!-- register -->
+<div class="register">
+	<div class="container">
+		<h3 class="animated wow zoomIn" data-wow-delay=".5s">فعال سازی حساب</h3>
+		<p class="est animated wow zoomIn" data-wow-delay=".5s">
+			ایمیلی حاوی یک کد برای شما ارسال شده است
+			برای فعال سازی حسابتان آن کد را وارد کنید
+			درصورت عدم دریافت کد و یا پایان وقت می توانید از قسمت فراموشی کلمه عبور اقدام کنید
+		</p>
+		<div class="login-form-grids">
+			<form class="animated wow slideInUp" method="post" dir="rtl" data-wow-delay=".5s">
+				{% csrf_token %}
+				<input type="text" name="activation_code" maxlength="6" placeholder="کد">
+				<input type="submit" value="فعال سازی">
+			</form>
+		</div>
+	</div>
+</div>
+<!-- //register -->
+{% endblock %}

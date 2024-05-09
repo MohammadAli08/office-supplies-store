@@ -1,0 +1,40 @@
+{% extends "shared/base.html" %}
+{% block content %}
+
+
+<!-- breadcrumbs -->
+<div class="breadcrumbs">
+	<div class="container">
+		<ol class="breadcrumb breadcrumb1 animated wow slideInLeft" data-wow-delay=".5s">
+			<li><a href="index.html"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>خانه</a></li>
+			<li class="active">ساخت حساب</li>
+		</ol>
+	</div>
+</div>
+<!-- //breadcrumbs -->
+<!-- register -->
+<div class="register">
+	<div class="container">
+		<h3 class="animated wow zoomIn" data-wow-delay=".5s">ایجاد حساب</h3>
+		<p class="est animated wow zoomIn" data-wow-delay=".5s">
+			ایمیل وارد شده می بایست ایمیلی واقعی باشد
+			زیرا در مرحله بعد برای صحت سنجی آن ایمیلی به آن ارسال می گردد
+		</p>
+		<div class="login-form-grids">
+			<form class="animated wow slideInUp" method="post" dir="rtl" data-wow-delay=".5s">
+				{% csrf_token %}
+				{% for field in form %}
+					{{field.errors}}
+					{{field}}
+				{% endfor %}
+				<input type="submit" value="ثبت نام">
+			</form>
+		</div>
+		<div class="center" data-wow-delay=".5s">
+			<h4 class="animated wow slideInUp" data-wow-delay=".5s">حساب داری؟</h4>
+			<p class="animated wow slideInUp" data-wow-delay=".5s"><a href="{% url 'accounts:login' %}">از اینجا وارد حسابت شو</a></p>	
+		</div>
+	</div>
+</div>
+<!-- //register -->
+{% endblock %}

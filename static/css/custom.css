@@ -1,0 +1,29 @@
+.errorlist {
+    color: red;
+    font-size: 15px;
+    margin-bottom: 5px;
+}
+
+.center {
+    text-align: center;
+}
+
+.register .center h4 {
+    margin: 2em 0 0.5em;
+    font-size: 1.5em;
+    color: #212121;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.register .center p a {
+    color: #d8703f;
+    text-decoration: none;
+    font-size: 1.2em;
+    padding: 0 .5em;
+}
+
+.check .checkbox {
+    font-size: 15px;
+}
+
