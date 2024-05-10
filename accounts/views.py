@@ -64,7 +64,7 @@ def login(request):
                     # Login user.
                     login_user(request, user)
                     messages.success(request, "خوش آمدید")
-                    return redirect("/")
+                    return redirect("home:index")
                 else:
                     messages.error(request, "حساب فعال نشده است")
         return render(request, "accounts/login.html", {"form": form})

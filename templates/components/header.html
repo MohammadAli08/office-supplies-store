@@ -1,12 +1,11 @@
+{% load static %}
+
 <!-- header -->
 <div class="header">
     <div class="container">
         <div class="header-grid">
             <div class="header-grid-left animated wow slideInLeft" data-wow-delay=".5s">
                 <ul>
-                    <li><i class="glyphicon glyphicon-envelope" aria-hidden="true"></i><a
-                            href="mailto:info@example.com">@example.com</a></li>
-                    <li><i class="glyphicon glyphicon-earphone" aria-hidden="true"></i>+1234 567 892</li>
                     {% if request.user.is_authenticated %}
                         <li><i class="glyphicon glyphicon-log-out" aria-hidden="true"></i><a
                             href="{% url 'accounts:logout' %}">خروج</a></li>
@@ -18,19 +17,11 @@
                     {% endif %}
                 </ul>
             </div>
-            <div class="header-grid-right animated wow slideInRight" data-wow-delay=".5s">
-                <ul class="social-icons">
-                    <li><a href="#" class="facebook"></a></li>
-                    <li><a href="#" class="twitter"></a></li>
-                    <li><a href="#" class="g"></a></li>
-                    <li><a href="#" class="instagram"></a></li>
-                </ul>
-            </div>
             <div class="clearfix"> </div>
         </div>
         <div class="logo-nav">
             <div class="logo-nav-left animated wow zoomIn" data-wow-delay=".5s">
-                <h1><a href="index.html">Best Store <span>Shop anywhere</span></a></h1>
+                <h1><a href="{% url 'home:index' %}">فروشگاه لوازم اداری</a></h1>
             </div>
             <div class="logo-nav-left1">
                 <nav class="navbar navbar-default">
@@ -46,10 +37,10 @@
                     </div>
                     <div class="collapse navbar-collapse" id="bs-megadropdown-tabs">
                         <ul class="nav navbar-nav">
-                            <li class="active"><a href="index.html" class="act">Home</a></li>
+                            <li class="{% if request.resolver_match.app_name == "home" %}active{% endif %}"><a href="{% url 'home:index' %}" class="act">خانه</a></li>
                             <!-- Mega Menu -->
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Products <b
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">محصولات <b
                                         class="caret"></b></a>
                                 <ul class="dropdown-menu multi-column columns-3">
                                     <div class="row">
@@ -89,56 +80,16 @@
                                     </div>
                                 </ul>
                             </li>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Furniture <b
-                                        class="caret"></b></a>
-                                <ul class="dropdown-menu multi-column columns-3">
-                                    <div class="row">
-                                        <div class="col-sm-4">
-                                            <ul class="multi-column-dropdown">
-                                                <h6>Home Collection</h6>
-                                                <li><a href="furniture.html">Cookware</a></li>
-                                                <li><a href="furniture.html">Sofas</a></li>
-                                                <li><a href="furniture.html">Dining Tables</a></li>
-                                                <li><a href="furniture.html">Shoe Racks</a></li>
-                                                <li><a href="furniture.html">Home Decor</a></li>
-                                            </ul>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <ul class="multi-column-dropdown">
-                                                <h6>Office Collection</h6>
-                                                <li><a href="furniture.html">Carpets</a></li>
-                                                <li><a href="furniture.html">Tables</a></li>
-                                                <li><a href="furniture.html">Sofas</a></li>
-                                                <li><a href="furniture.html">Shoe Racks</a></li>
-                                                <li><a href="furniture.html">Sockets</a></li>
-                                                <li><a href="furniture.html">Electrical Machines</a></li>
-                                            </ul>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <ul class="multi-column-dropdown">
-                                                <h6>Decorations</h6>
-                                                <li><a href="furniture.html">Toys</a></li>
-                                                <li><a href="furniture.html">Wall Clock</a></li>
-                                                <li><a href="furniture.html">Lighting</a></li>
-                                                <li><a href="furniture.html">Top Brands</a></li>
-                                            </ul>
-                                        </div>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                </ul>
-                            </li>
-                            <li><a href="short-codes.html">Short Codes</a></li>
-                            <li><a href="mail.html">Mail Us</a></li>
+                            <li><a href="#">تماس با ما</a></li>
                         </ul>
                     </div>
                 </nav>
             </div>
             <div class="logo-nav-right">
                 <div class="search-box">
-                    <div id="sb-search" class="sb-search">
+                    <div id="sb-search" class="sb-search" dir="rtl">
                         <form>
-                            <input class="sb-search-input" placeholder="Enter your search term..." type="search"
+                            <input class="sb-search-input" placeholder="دنبال چی می گردی? اینجا سرچش کن..." type="search"
                                 id="search">
                             <input class="sb-search-submit" type="submit" value="">
                             <span class="sb-icon-search"> </span>
@@ -146,8 +97,8 @@
                     </div>
                 </div>
                 <!-- search-scripts -->
-                <script src="js/classie.js"></script>
-                <script src="js/uisearch.js"></script>
+                <script src="{% static 'js/classie.js' %}"></script>
+                <script src="{% static 'js/uisearch.js' %}"></script>
                 <script>
                     new UISearch(document.getElementById('sb-search'));
                 </script>
@@ -158,13 +109,13 @@
                     <a href="checkout.html">
                         <h3>
                             <div class="total">
-                                <span class="simpleCart_total"></span> (<span id="simpleCart_quantity"
-                                    class="simpleCart_quantity"></span> items)
+                                <span class="cartTotalPrice"></span> (تعداد: <span id="simpleCart_quantity"
+                                    class="simpleCart_quantity"></span>)
                             </div>
-                            <img src="images/bag.png" alt="" />
+                            <img src="{% static 'images/bag.png' %}" alt="" />
                         </h3>
                     </a>
-                    <p><a href="javascript:;" class="simpleCart_empty">Empty Cart</a></p>
+                    <p><a href="javascript:;" class="simpleCart_empty">خالی کردن سبد</a></p>
                     <div class="clearfix"> </div>
                 </div>
             </div>
