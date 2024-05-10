@@ -50,6 +50,8 @@ INSTALLED_APPS = [
 
     # externals
     'django_render_partial',
+    'django_jalali',
+    'colorfield',
 
     # internals
     'home.apps.HomeConfig',

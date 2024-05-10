@@ -17,7 +17,7 @@ class User(AbstractUser):
     email_activation_code = models.PositiveIntegerField(
         "کد فعال سازی حساب", blank=True, null=True)
     photo = models.ImageField(
-        "تصویر", upload_to="accounts/images/", default="accounts/images/default-photo.png")
+        "تصویر", upload_to="images/accounts/", default="images/accounts/default-photo.png")
     address = models.TextField("آدرس", max_length=700, blank=True, null=True)
 
     is_active = models.BooleanField("فعال", default=False)
@@ -47,3 +47,10 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "کاربر"
         verbose_name_plural = "کاربران"
+
+
+class Visitor(models.Model):
+    user = models.OneToOneField(
+        to=User, on_delete=models.SET_NULL, related_name="viewer", blank=True, null=True, editable=False)
+    ip = models.GenericIPAddressField(
+        "آی‌پی", blank=True, null=True, editable=False)
