@@ -3,6 +3,7 @@ from typing import Any
 from django.db import models
 from django.utils.text import slugify
 from django.core.validators import MaxValueValidator
+from django.db.models.aggregates import Avg
 
 # Project
 from .deletion import SET_PARENT, SOFT_CASCADE
@@ -63,30 +64,6 @@ class SoftDelete(models.Model):
 
 # ---------------------models--------------------- #
 
-class Category(models.Model):
-    title = models.CharField("عنوان", max_length=225)
-    image = models.ImageField(verbose_name="تصویر",
-                              upload_to="images/categories/")
-
-    parent = models.ForeignKey(
-        to="self", on_delete=SET_PARENT, related_name="subsets", verbose_name="والد", blank=True, null=True)
-    is_active = models.BooleanField("فعال", default=True)
-
-    objects = AccessControlled()
-
-    def delete(self, using: Any = ..., keep_parents: bool = ...) -> tuple[int, dict[str, int]]:
-        storage, path = self.image.storage, self.image.path
-        storage.delete(path)
-        return super().delete(using, keep_parents)
-
-    def __str__(self) -> str:
-        return self.title
-
-    class Meta:
-        verbose_name = "دسته بندی"
-        verbose_name_plural = "دسته بندی ها"
-
-
 class Product(SoftDelete):
     title = models.CharField("عنوان", max_length=255)
     slug = models.SlugField("اسلاگ", max_length=255, blank=True, null=True)
@@ -108,7 +85,7 @@ class Product(SoftDelete):
 
     is_active = models.BooleanField("فعال", default=True)
 
-    parent = models.ForeignKey(to=Category, on_delete=SET_PARENT, related_name="products",
+    parent = models.ForeignKey(to="Category", on_delete=SET_PARENT, related_name="products",
                                blank=True, null=True, verbose_name="دسته بندی والد")
     visitors = models.ManyToManyField(
         to=Visitor, related_name="visited_products", blank=True, verbose_name="بازدید کننده ها")
@@ -126,6 +103,14 @@ class Product(SoftDelete):
             super().save(*args, **kwargs)
             self.slug = slugify(self.title+str(self.id), allow_unicode=True)
         return super().save()
+
+    @property
+    def final_price(self):
+        return self.price - self.discount
+
+    @property
+    def rating_number(self):
+        return self.comments.filter(is_active=True).aggregate(average_rating=Avg("rate"))["average_rating"] or 5
 
     class Meta:
         ordering = ["-created_at", "-updated_at"]
@@ -158,21 +143,13 @@ class ProductColorVariant(SoftDelete):
 
     objects = UndeletedManager()
     deleted = DeletedManager()
+
     def __str__(self) -> str:
         return f"{self.product}-{self.color}"
 
     class Meta:
         verbose_name = "نوع رنگی محصول"
         verbose_name_plural = "نوع های رنگی محصولات"
-
-
-# class DeletedProductColorVariant(ProductColorVariant):
-#     objects = DeletedManager()
-
-#     class Meta:
-#         proxy = True
-#         verbose_name = "نوع رنگی محصول حذف شده"
-#         verbose_name_plural = "نوع های رنگی محصولات حذف شده"
 
 
 class Color(models.Model):
@@ -252,3 +229,36 @@ class ProductComment(models.Model):
         indexes = [
             models.Index(fields=["-created_at"])
         ]
+
+
+class Category(models.Model):
+    title = models.CharField("عنوان", max_length=225)
+    image = models.ImageField(verbose_name="تصویر",
+                              upload_to="images/categories/")
+
+    parent = models.ForeignKey(
+        to="self", on_delete=SET_PARENT, related_name="subsets", verbose_name="والد", blank=True, null=True)
+    is_active = models.BooleanField("فعال", default=True)
+
+    objects = AccessControlled()
+
+    def delete(self, using: Any = ..., keep_parents: bool = ...) -> tuple[int, dict[str, int]]:
+        storage, path = self.image.storage, self.image.path
+        storage.delete(path)
+        return super().delete(using, keep_parents)
+
+    def get_subset_products(self, products_queryset=Product.objects):
+        def get_subset_ids(category):
+            ids = [category.id]
+            for sub_category in category.subsets.all():
+                ids.extend(get_subset_ids(sub_category))
+            return ids
+
+        return products_queryset.filter(parent_id__in=get_subset_ids(self))
+
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        verbose_name = "دسته بندی"
+        verbose_name_plural = "دسته بندی ها"

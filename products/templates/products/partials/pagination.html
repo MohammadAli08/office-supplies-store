@@ -1,0 +1,39 @@
+{% if paginated_products.has_previous %}
+    <a onclick="setProductsFilter({page: '{{ paginated_products.previous_page_number }}', {{extra_data}}}, '{{products_filter_url}}')" class="prev-arrow">
+        <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+    </a>
+    {% if paginated_products.number > 3 %}
+        <a onclick="setProductsFilter({page: '1', {{extra_data}}}, '{{products_filter_url}}')">1</a>
+        {% if paginated_products.number > 4 %}
+            <a href="" class="dot-dot">
+                <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+            </a>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+{% for num in paginated_products.paginator.page_range %}
+    {% if paginated_products.number == num %}
+        <a onclick="setProductsFilter({page: '{{ num }}', {{extra_data}}}, '{{products_filter_url}}')" class="active">{{ num }}</a>
+    {% elif num > paginated_products.number|add:'-3' and num < paginated_products.number|add:'3' %}
+        <a onclick="setProductsFilter({page: '{{ num }}', {{extra_data}}}, '{{products_filter_url}}')">{{ num }}</a>
+    {% endif %}
+{% endfor %}
+
+{% if paginated_products.has_next %}
+    {% if paginated_products.number < paginated_products.paginator.num_pages|add:'-3' %}
+        <a href="" class="dot-dot">
+            <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+        </a>
+        <a onclick="setProductsFilter({page: '{{ paginated_products.paginator.num_pages }}', {{extra_data}}}, '{{products_filter_url}}')">
+            {{ paginated_products.paginator.num_pages }}
+        </a>
+    {% elif paginated_products.number < paginated_products.paginator.num_pages|add:'-2' %} 
+        <a onclick="setProductsFilter({page: '{{ paginated_products.paginator.num_pages }}', {{extra_data}}}, '{{products_filter_url}}')">
+            {{ paginated_products.paginator.num_pages }}
+        </a>
+    {% endif %}
+    <a onclick="setProductsFilter({page: '{{ paginated_products.next_page_number }}', {{extra_data}}}, '{{products_filter_url}}')" class="next-arrow">
+        <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+    </a>
+{% endif %}

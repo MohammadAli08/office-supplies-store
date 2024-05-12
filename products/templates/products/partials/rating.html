@@ -1,0 +1,12 @@
+{% load static %}
+
+{% for i in "12345"|make_list %}
+    <div class="rating-left">
+        {% if forloop.counter > product.rating_number %}
+            <img src="{% static 'images/1.png' %}" alt=" " class="img-responsive" />
+        {% else %}
+            <img src="{% static 'images/2.png' %}" alt=" " class="img-responsive" />
+        {% endif %}
+    </div>
+{% endfor %}
+<div class="clearfix"> </div>

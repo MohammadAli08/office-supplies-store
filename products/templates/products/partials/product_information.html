@@ -1,0 +1,22 @@
+{% load humanize %}
+
+{% if product.parent %}
+    <h4><a href="single.html">{{product.parent.title}}</a></h4>
+    <p>{{product.title|truncatewords:"6"}}</p>
+{% else %}
+    <h4><a href="single.html">{{product.title|truncatewords:"6"}}</a></h4>
+{% endif %}
+<div class="new-collections-grid1-left simpleCart_shelfItem">
+    <p>
+        {% if product.discount %}
+            <i>{{product.price|intcomma:False}}</i>
+        {% endif %} 
+        <span class="item_price">
+            {{product.final_price|intcomma:False}}
+        </span>
+        <br/>
+        <a class="item_add" href="#">
+            اضافه به سبد خرید
+        </a>
+    </p>
+</div>

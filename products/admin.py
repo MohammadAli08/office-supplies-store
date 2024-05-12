@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from .models import (
     Category, Product, ProductColorVariant,
     Color, ProductGallery, ProductComment,
-    DeletedProduct#, DeletedProductColorVariant
+    DeletedProduct
 )
 
 
@@ -28,16 +28,19 @@ class ProductCommentInline(admin.TabularInline):
 class DeletedProductColorVariantInline(admin.TabularInline):
     model = ProductColorVariant
     can_delete = False
+
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         return self.model.deleted.all()
 
+
 # model admins.
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ["short_title", "parent", "price", "discount", "is_active"]
     list_editable = ["price", "discount", "is_active"]
     list_filter = ["parent", "is_active"]
-    readonly_fields = ["slug"]
+    readonly_fields = ["created_at", "updated_at", "slug"]
     date_hierarchy = "created_at"
     search_fields = ["title", "short_description", "long_description"]
     raw_id_fields = ["parent", "visitors", "liked_by"]
@@ -62,7 +65,8 @@ class DeletedProductAdmin(ProductAdmin):
     @admin.action(description="بازگردانی محصولات حذف شده")
     def recover_items(self, request, queryset):
         for product in queryset:
-            color_variants = ProductColorVariant.deleted.filter(product=product)
+            color_variants = ProductColorVariant.deleted.filter(
+                product=product)
             color_variants.update(is_deleted=False, deleted_at=None)
         queryset.update(is_deleted=False, deleted_at=None)
 

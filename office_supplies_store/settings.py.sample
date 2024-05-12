@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 
     # externals
     'django_render_partial',
@@ -57,7 +58,9 @@ INSTALLED_APPS = [
     'home.apps.HomeConfig',
     'accounts.apps.AccountsConfig',
     'products.apps.ProductsConfig',
+    'polls',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

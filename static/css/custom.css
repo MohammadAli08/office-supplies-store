@@ -27,3 +27,11 @@
     font-size: 15px;
 }
 
+.custom-color {
+    color: #d8703f !important;
+}
+
+
+.products .categories .cate li a {
+    cursor: pointer;
+}

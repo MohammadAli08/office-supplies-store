@@ -1,0 +1,45 @@
+{% load poll_extras %}
+{% if request.GET.category_id %}
+<li>
+    <a onclick="setProductsFilter({'category_id':'', 'category_changed': 'true'})">
+        همه ی دسته بندی ها
+    </a> 
+</li>
+{% endif %}
+{% for category in categories %}
+    {% if category.id == request.GET.category_id|add:0 %}
+        <li>
+            <a class="custom-color" onclick="setProductsFilter({'category_id':{{category.id}}, 'category_changed': 'true'})">
+                {{category.title}}
+            </a> 
+            <span>
+                ({% products_count category request.user %})
+            </span>
+        </li>
+        <ul>
+            {% for sub_category in category.subsets.all %}
+                <li>
+                    <a onclick="setProductsFilter({'category_id':{{sub_category.id}}, 'category_changed': 'true'})">
+                        {{sub_category.title}}
+                    </a>
+                    <span>
+                        ({% products_count sub_category request.user %})
+                    </span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <li>
+            <a onclick="setProductsFilter({'category_id':{{category.id}}, 'category_changed': 'true'})">
+                {{category.title}}
+            </a> 
+            <span>
+                ({% products_count category request.user %})
+            </span>
+        </li>
+    {% endif %}
+{% empty %}
+    <h4 class="center">
+        دسته بندی پیدا نشد
+    </h4>
+{% endfor %}

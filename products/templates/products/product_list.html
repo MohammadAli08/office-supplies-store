@@ -1,0 +1,71 @@
+{% extends "shared/base.html" %}
+{% load static humanize poll_extras %}
+
+{% block title %}لیست محصولات{% endblock %}
+
+{% block content %}
+<!-- breadcrumbs -->
+<div class="breadcrumbs">
+	<div class="container">
+		<ol class="breadcrumb breadcrumb1 animated wow slideInLeft" data-wow-delay=".5s">
+			<li>
+				<a href="{% url 'home:index' %}">
+					<span class="glyphicon glyphicon-home" aria-hidden="true"></span>خانه
+				</a>
+			</li>
+			<li class="active">محصولات</li>
+		</ol>
+	</div>
+</div>
+<div class="products">
+	<div class="container">
+		<div class="col-md-4 products-left">
+			<div class="filter-price animated wow slideInUp" id="price-filter-area" data-wow-delay=".5s">
+				{% include "products/partials/price_filter.html" %}
+			</div>
+			<div class="categories animated wow slideInUp" data-wow-delay=".5s">
+				<h3>دسته بندی ها</h3>
+				<ul class="cate" id="categories-area">
+					{% include "products/partials/categories.html" %}
+				</ul>
+			</div>
+		</div>
+		<div class="col-md-8 products-right">
+			<div class="products-right-grid">
+				<div class="products-right-grids animated wow slideInRight" data-wow-delay=".5s">
+					<div class="sorting" id="sorting-area">
+						<select id="country" onchange="setProductsFilter({'sort_by': this.value})" class="frm-field required sect">
+							<option value="newest">جدیدترین</option>
+							<option value="cheapest">ارزان ترین</option>
+							<option value="most-expensive">گران ترین</option>
+							<option value="most-rating">بیشترین نمره</option>
+							<option value="most-popular">محبوب ترین</option>
+							<option value="most-visited">پربازدید ترین</option>
+						</select>
+					</div>
+					<div class="sorting-left" id="per-page-area">
+						<select id="country1" onchange="setProductsFilter({'per_page_changed': 'true'})" class="frm-field required sect">
+							<option value="9">۹ محصول در هر صفحه</option>
+							<option value="15">۱۵ محصول در هر صفحه</option>
+							<option value="30">۳۰ محصول در هر صفحه</option>
+						</select>
+					</div>
+					<div class="clearfix"> </div>
+				</div>
+			</div>
+			<div class="products-right-grids-bottom">
+				<div class="row" id="products-area">
+					{% include "products/partials/product_partials.html" %}
+				</div>
+			</div>
+			<nav class="numbering animated wow slideInRight" data-wow-delay=".5s">
+				<ul class="pagination paging" id="pagination-area">
+					{% include "products/partials/pagination.html" %}
+				</ul>
+			</nav>
+		</div>
+		<div class="clearfix"> </div>
+	</div>
+</div>
+<!-- //breadcrumbs -->
+{% endblock %}

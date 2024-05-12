@@ -1,0 +1,18 @@
+{% load static %}
+
+<h3>فیلتر قیمت</h3>
+<ul class="dropdown-menu1">
+    <li>
+        <div id="slider-range"  maxPrice="{{max_price}}"
+            startPrice="{{start_price}}" endPrice="{{end_price}}"></div>
+        <input type="text" id="amount" style="border: 0" />
+    </li>
+</ul>
+<script type='text/javascript' src="{% static 'js/priceRange.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script type='text/javascript'>
+    $(window).load(function() {
+        setPriceRange()
+    });
+</script>
+<!---->
