@@ -1,12 +1,12 @@
-{% load static %}
-
-{% for i in "12345"|make_list %}
-    <div class="rating-left">
-        {% if forloop.counter > product.rating_number %}
-            <img src="{% static 'images/1.png' %}" alt=" " class="img-responsive" />
+{% for _ in "12345"|make_list %}
+    {% if forloop.counter > rating_number %}
+        {% if forloop.counter|add:"-1" < rating_number %}
+            <i class="fa fa-star-half"></i>
         {% else %}
-            <img src="{% static 'images/2.png' %}" alt=" " class="img-responsive" />
+            <i class="{{empty_star_class}}"></i>
         {% endif %}
-    </div>
+    {% else %}
+        <i class="fa fa-star"></i>
+    {% endif %}
 {% endfor %}
 <div class="clearfix"> </div>

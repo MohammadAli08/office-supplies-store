@@ -23,6 +23,7 @@ class ProductGalleryInline(admin.TabularInline):
 
 class ProductCommentInline(admin.TabularInline):
     model = ProductComment
+    readonly_fields = ["created_at"]
 
 
 class DeletedProductColorVariantInline(admin.TabularInline):

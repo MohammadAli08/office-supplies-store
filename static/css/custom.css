@@ -35,3 +35,78 @@
 .products .categories .cate li a {
     cursor: pointer;
 }
+
+.rating i {
+    color: gold;
+}
+
+.single .container h4 del {
+    color: #999;
+    position: relative;
+    font-style: normal;
+    font-size: 20px;
+}
+
+
+.color-quality-right ul li a span:hover {
+    cursor: pointer;
+}
+
+.progress .progress-bar {
+    text-align: left;
+}
+
+.progress .progress-bar .sr-only {
+    margin-left: 5px;
+    overflow: visible;
+    clip: auto;
+    color: #222;
+}
+
+
+.single .single-right .col-md-7 {
+    text-align: right;
+}
+
+.single .occasion-cart {
+    margin-top: 10px;
+}
+
+
+.single .tab-content .tab-pane .img-responsive {
+    max-width: 75%;
+    border-radius: 50%;
+    margin-top: 5px;
+}
+
+.reply-comments {
+    margin-right: 13%;
+    padding-right: 2%;
+    border-right: .5px solid lightgray
+}
+
+.reply-comments:last-child {
+    margin-bottom: 5%;
+}
+
+.reviews .text-center a {
+    cursor: pointer;
+}
+
+#in-stock-status h4 {
+    color: #333;
+    font-size: 1rem;
+}
+
+#in-stock-status .available {
+    color: green;
+}
+
+
+#in-stock-status .unavailable {
+    color: darkred;
+}
+
+#in-stock-status .few-in-stock {
+    color: red;
+}

@@ -1,9 +1,13 @@
-# Django
+# Python
 from typing import Any
+
+# Django
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.utils.text import slugify
-from django.core.validators import MaxValueValidator
 from django.db.models.aggregates import Avg
+from django.urls import reverse
+from django.utils.text import slugify
 
 # Project
 from .deletion import SET_PARENT, SOFT_CASCADE
@@ -90,13 +94,27 @@ class Product(SoftDelete):
     visitors = models.ManyToManyField(
         to=Visitor, related_name="visited_products", blank=True, verbose_name="بازدید کننده ها")
     liked_by = models.ManyToManyField(
-        to=Visitor, related_name="liked_products", blank=True, verbose_name="پسندیده شده توسط")
+        to=User, related_name="liked_products", blank=True, verbose_name="پسندیده شده توسط")
 
     objects = UndeletedManager()
     access_controlled = AccessControlled()
 
-    def __str__(self) -> str:
-        return F"{self.title[:15]}..."
+    @property
+    def final_price(self):
+        return self.price - self.discount
+
+    def get_rating_average(self, user=None, comments_queryset=None):
+        if user:
+            comments = ProductComment.access_control.access_level(user)
+        else:
+            comments = comments_queryset or ProductComment.objects
+        return comments.filter(product=self).aggregate(average_rating=Avg("rate"))["average_rating"] or 5
+
+    def get_color_variants(self):
+        return self.product_color_variants.exclude(stock_count=0, color__color_name="_")
+
+    def get_absolute_url(self):
+        return reverse("products:detail", kwargs={"product_id": self.id})
 
     def save(self, *args, **kwargs) -> None:
         if not self.id:
@@ -104,13 +122,8 @@ class Product(SoftDelete):
             self.slug = slugify(self.title+str(self.id), allow_unicode=True)
         return super().save()
 
-    @property
-    def final_price(self):
-        return self.price - self.discount
-
-    @property
-    def rating_number(self):
-        return self.comments.filter(is_active=True).aggregate(average_rating=Avg("rate"))["average_rating"] or 5
+    def __str__(self) -> str:
+        return F"{self.title[:15]}..."
 
     class Meta:
         ordering = ["-created_at", "-updated_at"]
@@ -143,6 +156,15 @@ class ProductColorVariant(SoftDelete):
 
     objects = UndeletedManager()
     deleted = DeletedManager()
+
+    def get_price(self):
+        return self.price or self.product.price
+
+    def get_discount(self):
+        return self.discount or self.product.discount
+    
+    def get_final_price(self):
+        return self.get_price() - self.get_discount()
 
     def __str__(self) -> str:
         return f"{self.product}-{self.color}"
@@ -204,7 +226,7 @@ class ProductGallery(models.Model):
 class ProductComment(models.Model):
     message = models.TextField("پیام")
     rate = models.PositiveSmallIntegerField(
-        "نمره", default=5, validators=[MaxValueValidator(5)])
+        "نمره", validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True, null=True)
 
     user = models.ForeignKey(
         to=User, on_delete=models.CASCADE, related_name="comments", verbose_name="کاربر")
@@ -218,6 +240,25 @@ class ProductComment(models.Model):
     is_active = models.BooleanField("فعال", default=True)
 
     objects = jmodels.jManager()
+    access_control = AccessControlled()
+
+    def clean(self) -> None:
+        if self.rate and self.parent:
+            raise ValidationError(
+                {"rate": "یک نظر همزمان نمی تواند هم پاسخ باشد و هم نمره داشته باشد."})
+        elif not (self.rate or self.parent):
+            raise ValidationError(
+                {"rate": "نمره را وارد کنید."})
+        else:
+            return super().clean()
+
+    def get_answers(self, user=None, comments_queryset=None):
+        """
+        Return all of the answers of a comment based on 
+        user permissions or comments_queryset.
+        """
+        all_comments = comments_queryset or ProductComment.access_control.access_level(user)
+        return all_comments.filter(parent=self)
 
     def __str__(self) -> str:
         return F"{str(self.user)}-{str(self.product)}"
@@ -226,6 +267,7 @@ class ProductComment(models.Model):
         verbose_name = "نظر محصول"
         verbose_name_plural = "نظرات محصول"
 
+        ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["-created_at"])
         ]

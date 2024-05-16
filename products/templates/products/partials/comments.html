@@ -1,0 +1,73 @@
+{% load poll_extras jformat %}
+{% for comment in paginated_comments.object_list %}
+    <div class="bootstrap-tab-text-grid">
+        {% with user=comment.user %}
+        <div class="bootstrap-tab-text-grid-right">
+            <img src="{{user.photo.url}}" alt="" class="img-responsive" />
+        </div>
+        <div class="bootstrap-tab-text-grid-left">
+            <ul>
+                <li>{{user.username}}<span></span></li>
+                <li>
+                    <a onclick="replyComment({{comment.id}}, '{{user.username}}')">
+                        <span class="glyphicon glyphicon-share" aria-hidden="true"></span>پاسخ
+                    </a>
+                </li>
+                <li>
+                    <div class="rating ml-2">
+                        {% include "products/partials/rating.html" with rating_number=comment.rate empty_star_class="fa-regular fa-star" %}
+                    </div>
+                </li>
+                <li>
+                    {{comment.created_at|jformat:"%Y/%m/%d - %H:%M"}} <span></span>
+                </li>
+                {% if not comment.is_active %}
+                    <li>
+                        <a href="">
+                            غیر فعال
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+            <p>
+                {{comment.message}}
+            </p>
+        </div>
+        <div class="clearfix"> </div>
+        {% endwith %}
+        {% call_method comment "get_answers" comments_queryset=all_comments as answers %}
+        {% for answer in answers %}
+            {% with user=answer.user %}
+            <div class="reply-comments">
+                <div class="bootstrap-tab-text-grid-right">
+                    <img src="{{user.photo.url}}" alt="" class="img-responsive" />
+                </div>
+                <div class="bootstrap-tab-text-grid-left">
+                    <ul>
+                        <li>{{user.username}} <span></span></li>
+                        <li></li>
+                        <li>{{answer.created_at|jformat:"%Y/%m/%d - %H:%M"}} <span></span></li>
+                    </ul>
+                    <p>
+                        {{answer.message}}
+                    </p>
+                </div>
+                <div class="clearfix"> </div>
+            </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+{% empty %}
+    <div class="alert alert-info text-center">
+        <h3>
+            هنوز کسی نظری ننوشته
+        </h3>
+    </div>
+{% endfor %}
+{% if paginated_comments.has_next %}
+    <h5 class="text-center" id="show-more-comments">
+        <a onclick="showMoreComments({{request.resolver_match.kwargs.product_id}}, {{paginated_comments.next_page_number}})">
+            نمایش بیشتر  <span class="glyphicon glyphicon-circle-arrow-down" aria-hidden="true"></span>
+        </a>
+    </h5>
+{% endif %}

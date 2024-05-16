@@ -1,16 +1,18 @@
+{% load poll_extras %}
 {% for product in paginated_products.object_list %}
     <div class="col-sm-4 products-right-grids-bottom-grid">
         <div class="new-collections-grid1 products-right-grid1 animated wow slideInUp" data-wow-delay=".5s">
             <div class="new-collections-grid1-image">
-                <a href="single.html" class="product-image">
+                <a href="{{product.get_absolute_url}}" class="product-image">
                     <img src="{{product.main_image.url}}" alt="" class="img-responsive">
                 </a>
                 <div class="new-collections-grid1-image-pos products-right-grids-pos">
-                    <a href="single.html">نمایش محصول</a>
+                    <a href="{{product.get_absolute_url}}">نمایش محصول</a>
                 </div>
                 <div class="new-collections-grid1-right products-right-grids-pos-right">
                     <div class="rating">
-                        {% include "products/partials/rating.html" %}
+                        {% call_method product "get_rating_average" user=request.user as rating_number %}
+                        {% include "products/partials/rating.html" with empty_star_class="fa-regular fa-star" %}
                     </div>
                 </div>
             </div>

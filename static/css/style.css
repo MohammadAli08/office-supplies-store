@@ -696,6 +696,7 @@ p.est{
     text-transform: uppercase;
     padding: .5em 1em;
     border: 1px solid;
+	cursor: pointer;
 }
 .new-collections-grid1-left p i{
 	color: #999;
@@ -1795,35 +1796,37 @@ ul.wmuSliderPagination {
 .color-quality-left{
 	float:left;
 }
-.color-quality-left h5,.color-quality-right h5,.occasional h5{
+.color-quality-right h5,.color-quality-right h5,.occasional h5{
 	text-transform:uppercase;
 	font-size:1em;
 	color:#212121;
 	margin:0 0 1em;
 }
-.color-quality-left ul li{
+.color-quality-right ul li{
 	display:inline-block;
 	margin-right:.5em;
 }
-.color-quality-left ul li a{
+.color-quality-right ul li a{
 	font-size:14px;
 	color:#999;
 	text-decoration:none;
 }
-.color-quality-left ul li a span{
-	width: 15px;
-    height: 15px;
+.color-quality-right ul li a span{
+	border: 2px solid;
+	border-radius: 25%;
+	width: 17px;
+    height: 17px;
     display: block;
     background: #ff0000;
     margin: 0 auto .5em;
 }
-.color-quality-left ul li a.brown span{
+.color-quality-right ul li a.brown span{
     background: #00008c;
 }
-.color-quality-left ul li a.purple span{
+.color-quality-right ul li a.purple span{
     background: #840084;
 }
-.color-quality-left ul li a.gray span{
+.color-quality-right ul li a.gray span{
     background: #ff00ff;
 }
 .color-quality-right{
@@ -1915,35 +1918,36 @@ label.radio {
 }
 .bootstrap-tab-text-grid-left{
 	float:left;
-	width:20%;
+	width:80%;
 }
 .bootstrap-tab-text-grid-right{
 	float:right;
-	width:75%;
+	width:20%;
 }
-.bootstrap-tab-text-grid-right ul li{
+.bootstrap-tab-text-grid-left ul li{
 	display:inline-block;
 }
-.bootstrap-tab-text-grid-right ul li:nth-child(2){
-	float:right;
+.bootstrap-tab-text-grid-left ul li:nth-child(2){
+	float:left;
 }
-.bootstrap-tab-text-grid-right ul li a{
+.bootstrap-tab-text-grid-left ul li a{
 	font-size:1em;
 	color:#D8703F;
+	cursor: pointer;
 	text-transform:uppercase;
 	text-decoration:none;
 }
-.bootstrap-tab-text-grid-right ul li a:hover{
+.bootstrap-tab-text-grid-left ul li a:hover{
 	color: #212121;
 }
-.bootstrap-tab-text-grid-right ul li a span{
-	left:-1em;
+.bootstrap-tab-text-grid-left ul li a span{
+	right:-1em;
 }
 .bootstrap-tab-text-grids{
-	margin:3em 0 0 5em;
+	margin:3em 5em 0 0;
 }
-.bootstrap-tab-text-grid-right p{
-	margin:2em 0 0;
+.bootstrap-tab-text-grid-left p{
+	margin:4% 0 0;
 	color:#999;
 	font-size:14px;
 	line-height:1.8em;

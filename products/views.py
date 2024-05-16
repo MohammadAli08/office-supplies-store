@@ -1,16 +1,25 @@
 # Django
+import json
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.views.generic import View
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.utils.decorators import method_decorator
 from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_GET
+from django.views.generic import View
+
+from accounts.models import Visitor
+from utils.http import get_visitor_ip
 
 # Project
 from . import models
+from .forms import ProductCommentForm
 from utils.decorators import ajax_required
 
+
+# ----------------------product list----------------------
 
 def category_filter(request, categories_queryset, products_queryset=None):
     """Filter products based on selected category"""
@@ -72,7 +81,7 @@ def sort_products(request, products):
             def order_by(product): return product.final_price
             reverse = True
         case "most-rating":
-            def order_by(product): return product.rating_number
+            def order_by(product): return product.get_rating_average()
             reverse = True
         case "most-popular":
             def order_by(product): return product.liked_by.count()
@@ -151,14 +160,13 @@ def filter_data(request):
     }
 
 
-@method_decorator(require_GET, "dispatch")
 class ProductListView(View):
     def get(self, request):
         context = filter_data(request)
         return render(request, "products/product_list.html", context)
 
 
-@method_decorator((ajax_required, require_GET), "dispatch")
+@method_decorator(ajax_required, "dispatch")
 class ProductListFilterAjaxView(View):
     def get(self, request):
         response = filter_data(request)
@@ -182,3 +190,175 @@ class ProductListFilterAjaxView(View):
         )
 
         return JsonResponse(data)
+
+
+# ---------------------product detail---------------------
+
+def get_common_data(user, product_id):
+    """
+    Find and return all common data that used in product
+    details pages.
+    """
+
+    # Find all products and comments that this user can access.
+    all_products = models.Product.access_controlled.access_level(
+        user)
+    all_comments = models.ProductComment.access_control.access_level(
+        user)
+
+    # Find the selected product and its comments.
+    product = get_object_or_404(all_products, id=product_id)
+    product_comments = all_comments.filter(product=product)
+
+    # Get the comments that doesn't have parent comment.
+    product_main_comments = product_comments.filter(parent__isnull=True)
+    # paginate them.
+    paginator = Paginator(product_main_comments, 5)
+
+    return paginator, product, product_comments, product_main_comments
+
+
+@method_decorator((login_required), "post")
+class ProductDetailView(View):
+    def get(self, request, product_id):
+        context = self.get_context_data(product_id)
+        context["form"] = ProductCommentForm()
+        product = context["product"]
+        if request.user.is_authenticated:
+            visitor, _ = Visitor.objects.get_or_create(user=request.user)
+            visitor.ip = get_visitor_ip(request)
+        else:
+            visitor, _ = Visitor.objects.get_or_create(
+                ip=get_visitor_ip(request))
+        visitor.save()
+        product.visitors.add(visitor)
+        return render(request, "products/product_detail.html", context)
+
+    def post(self, request, product_id):
+        """Create comments.
+
+        Hints:
+        Comments can only be created as an original comment or as a reply.
+        Replies can only be added to the original comment, not to comments
+        that are replies.
+        """
+
+        context = self.get_context_data(product_id)
+
+        # Fill the form with submitted data.
+        form = ProductCommentForm(request.POST)
+        # Validate the form.
+        if form.is_valid():
+            # Save the comment without saving on database to get the instance.
+            comment = form.save(commit=False)
+            product = context["product"]
+
+            # Validate parent comment.
+            if parent := comment.parent:
+                # Is the parent comment of the parent field a main comment?
+                if parent.parent is not None:
+                    form.add_error(
+                        "parent", "پاسخ تنها می تواند برای نظرات اصلی درج شود.")
+
+                # Is the parent comment for this product?
+                elif parent not in context["all_comments"]:
+                    form.add_error(
+                        "parent", "پاسخ باید برای نظرهای این محصول درج شود.")
+            # Set product and user of this comment.
+            comment.product = product
+            comment.user = request.user
+
+            # Save comment on database.
+            comment.save()
+            messages.success(request, "نظر شما با موفقیت ثبت شد")
+
+            # Update the context data.
+            context = self.get_context_data(product_id)
+
+            # Create an empty form.
+            form = ProductCommentForm()
+
+        context["form"] = form
+        return render(request, "products/product_detail.html", context)
+
+    def get_context_data(self, product_id):
+        common_data = get_common_data(self.request.user, product_id)
+        paginator, product, product_comments, product_main_comments = common_data
+
+        paginated_comments = paginator.get_page(1)
+        return {
+            "product": product,
+            "paginated_comments": paginated_comments,
+            "all_comments": product_comments,
+            "comments_count": product_main_comments.count()
+        }
+
+
+@require_GET
+@ajax_required
+def get_comments(request, product_id, page):
+    """
+    Get more comments to show to user.
+    """
+    paginator, *_ = get_common_data(request.user, product_id)
+    try:
+        paginated_comments = paginator.get_page(page)
+    except:
+        pass
+    else:
+        rendered_comments = render_to_string("products/partials/comments.html",
+                                             {"paginated_comments": paginated_comments}, request)
+        return JsonResponse({"comments": rendered_comments})
+
+
+@ajax_required
+def like_or_dislike_ajax(request, product_id):
+    """
+    Change the liked products to disliked products and vice versa.
+    If user is authenticated the liked products will add to the
+    liked_products field But otherwise, the liked products are
+    stored on cookies.
+    """
+
+    # Get the user.
+    user = request.user
+    # Get the product based on user permission.
+    all_products = models.Product.access_controlled.access_level(user)
+    product = get_object_or_404(all_products, id=product_id)
+
+    # Set a default value for data.
+    data = {"success": "محصول با موفقیت به لیست علاقه مندی ها افزوده شد",
+            "is_liked": "true"}
+    if user.is_authenticated:
+        # If the user already exists in the product's liked by, remove it.
+        if user in product.liked_by.all():
+            product.liked_by.remove(user)
+            data = {"success": "محصول با موفقیت از لیست علاقه مندی ها حذف شد"}
+        # If user doesn't exist in products's liked by, add it.
+        else:
+            product.liked_by.add(user)
+
+        # Create the response.
+        response = JsonResponse(data)
+    else:
+        # Get the current liked products list from cookies.
+        liked_products_cookie = request.COOKIES.get("liked_products", "[]")
+
+        # Try to converts them to list.
+        try:
+            liked_products: list = json.loads(liked_products_cookie)
+        # Set a blank list for liked_products if there is an exception.
+        except:
+            liked_products = []
+        # If product already exists in user liked products, Remove it.
+        if product_id in liked_products:
+            liked_products.remove(product_id)
+            data = {"success": "محصول با موفقیت از لیست علاقه مندی ها حذف شد"}
+        # If product doesn't exist in user liked products, Add it.
+        else:
+            liked_products.append(product_id)
+        # Create the response.
+        response = JsonResponse(data)
+        # Set the user liked products on cookies.
+        response.set_cookie("liked_products", json.dumps(liked_products))
+    return response
