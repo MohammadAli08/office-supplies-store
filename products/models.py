@@ -210,11 +210,6 @@ class ProductGallery(models.Model):
     image = models.ImageField(verbose_name="تصویر",
                               upload_to="images/products/")
 
-    def delete(self, using: Any = ..., keep_parents: bool = ...) -> tuple[int, dict[str, int]]:
-        storage, path = self.image.storage, self.image.path
-        storage.delete(path)
-        return super().delete(using, keep_parents)
-
     def __str__(self) -> str:
         return F"{self.id}-{self.product}"
 

@@ -7,3 +7,6 @@ class ProductsConfig(AppConfig):
 
     verbose_name = "محصول"
     verbose_name_plural = "محصولات"
+
+    def ready(self) -> None:
+        import products.signals
