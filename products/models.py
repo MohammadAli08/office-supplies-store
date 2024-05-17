@@ -155,14 +155,13 @@ class ProductColorVariant(SoftDelete):
     stock_count = models.PositiveIntegerField("تعداد موجودی")
 
     objects = UndeletedManager()
-    deleted = DeletedManager()
 
     def get_price(self):
         return self.price or self.product.price
 
     def get_discount(self):
         return self.discount or self.product.discount
-    
+
     def get_final_price(self):
         return self.get_price() - self.get_discount()
 
@@ -172,6 +171,15 @@ class ProductColorVariant(SoftDelete):
     class Meta:
         verbose_name = "نوع رنگی محصول"
         verbose_name_plural = "نوع های رنگی محصولات"
+
+
+class DeletedProductColorVariant(ProductColorVariant):
+    objects = DeletedManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "نوع رنگی محصول حذف شده"
+        verbose_name_plural = "نوع رنگی های محصولات حذف شده"
 
 
 class Color(models.Model):
@@ -252,7 +260,8 @@ class ProductComment(models.Model):
         Return all of the answers of a comment based on 
         user permissions or comments_queryset.
         """
-        all_comments = comments_queryset or ProductComment.access_control.access_level(user)
+        all_comments = comments_queryset or ProductComment.access_control.access_level(
+            user)
         return all_comments.filter(parent=self)
 
     def __str__(self) -> str:

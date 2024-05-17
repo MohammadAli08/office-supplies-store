@@ -6,7 +6,7 @@ from django.http import HttpRequest
 
 # Project
 from .models import (
-    Category, Product, ProductColorVariant,
+    Category, DeletedProductColorVariant, Product, ProductColorVariant,
     Color, ProductGallery, ProductComment,
     DeletedProduct
 )
@@ -17,6 +17,11 @@ class ProductColorVariantInline(admin.TabularInline):
     model = ProductColorVariant
 
 
+class DeletedProductColorVariantInline(admin.TabularInline):
+    model = DeletedProductColorVariant
+    can_delete = False
+
+
 class ProductGalleryInline(admin.TabularInline):
     model = ProductGallery
 
@@ -25,13 +30,6 @@ class ProductCommentInline(admin.TabularInline):
     model = ProductComment
     readonly_fields = ["created_at"]
 
-
-class DeletedProductColorVariantInline(admin.TabularInline):
-    model = ProductColorVariant
-    can_delete = False
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
-        return self.model.deleted.all()
 
 
 # model admins.
@@ -66,23 +64,29 @@ class DeletedProductAdmin(ProductAdmin):
     @admin.action(description="بازگردانی محصولات حذف شده")
     def recover_items(self, request, queryset):
         for product in queryset:
-            color_variants = ProductColorVariant.deleted.filter(
+            color_variants = DeletedProductColorVariant.objects.filter(
                 product=product)
             color_variants.update(is_deleted=False, deleted_at=None)
         queryset.update(is_deleted=False, deleted_at=None)
 
 
 @admin.register(ProductColorVariant)
-class DeletedProductColorVariantsAdmin(admin.ModelAdmin):
-    actions = ["recover_items"]
+class ProductColorVariantAdmin(admin.ModelAdmin):
     list_display = ["product", "color", "price", "discount"]
     list_editable = ["price", "discount"]
     list_filter = ["color"]
     search_fields = ["product", "color"]
     raw_id_fields = ["product", "color"]
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
-        return ProductColorVariant.deleted.all()
+
+@admin.register(DeletedProductColorVariant)
+class DeletedProductColorVariantAdmin(admin.ModelAdmin):
+    actions = ["recover_items"]
+    list_display = ["product", "color", "price", "discount"]
+    list_editable = ["price", "discount"]
+    list_filter = ["color"]
+    search_fields = ["product", "color"]
+    raw_id_fields = ["product", "color"]
 
     @admin.action(description="بازگردانی نوع های رنگی محصول حذف شده")
     def recover_items(self, request, queryset):
