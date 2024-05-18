@@ -7,13 +7,28 @@
             <div class="header-grid-left animated wow slideInLeft" data-wow-delay=".5s">
                 <ul>
                     {% if request.user.is_authenticated %}
-                        <li><i class="glyphicon glyphicon-log-out" aria-hidden="true"></i><a
-                            href="{% url 'accounts:logout' %}">خروج</a></li>
-                    {% else %}
-                        <li><i class="glyphicon glyphicon-log-in" aria-hidden="true"></i><a href="{% url 'accounts:login' %}">ورود</a>
+                        <li>
+                            <i class="glyphicon glyphicon-log-out" aria-hidden="true"></i>
+                            <a href="{% url 'accounts:logout' %}">
+                                خروج
+                            </a>
                         </li>
-                        <li><i class="glyphicon glyphicon-book" aria-hidden="true"></i><a
-                            href="{% url 'accounts:register' %}">ثبت نام</a></li>
+                        {% if request.user.is_superuser %}
+                            <li>
+                                <i class="glyphicon glyphicon-cog" aria-hidden="true"></i>
+                                <a href="{% url 'admin:index' %}">
+                                    پنل ادمین
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li>
+                            <i class="glyphicon glyphicon-log-in" aria-hidden="true"></i>
+                            <a href="{% url 'accounts:login' %}">ورود</a>
+                        </li>
+                        <li>
+                            <i class="glyphicon glyphicon-book" aria-hidden="true"></i>
+                        <a href="{% url 'accounts:register' %}">ثبت نام</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -54,9 +69,9 @@
             <div class="logo-nav-right">
                 <div class="search-box">
                     <div id="sb-search" class="sb-search" dir="rtl">
-                        <form>
+                        <form action="/products/">
                             <input class="sb-search-input" placeholder="دنبال چی می گردی? اینجا سرچش کن..." type="search"
-                                id="search">
+                                id="search" name="search" value="{{request.GET.search}}">
                             <input class="sb-search-submit" type="submit" value="">
                             <span class="sb-icon-search"> </span>
                         </form>

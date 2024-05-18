@@ -1,8 +1,11 @@
-# Django
+# Python
 import json
+
+# Django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
@@ -10,12 +13,11 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_GET
 from django.views.generic import View
 
-from accounts.models import Visitor
-from utils.http import get_visitor_ip
-
 # Project
 from . import models
 from .forms import ProductCommentForm
+from accounts.models import Visitor
+from utils.http import get_visitor_ip
 from utils.decorators import ajax_required
 
 
@@ -106,7 +108,7 @@ def paginate_products(request, products):
     page_number = request.GET.get("page", 1)
 
     # Create Paginator object.
-    paginator = Paginator(products, per_page)
+    paginator = Paginator(products, 1)
     # Get the selected page.
     try:
         page_obj = paginator.get_page(page_number)
@@ -116,6 +118,15 @@ def paginate_products(request, products):
         page_obj = paginator.get_page(1)
 
     return page_obj, per_page
+
+
+def search(request, products):
+    if search := request.GET.get("search"):
+        return products.filter(Q(title__contains=search) |
+                    Q(short_description__contains=search) |
+                    Q(long_description__contains=search))
+    else:
+        return products
 
 
 def filter_data(request):
@@ -129,6 +140,8 @@ def filter_data(request):
 
     products, categories = category_filter(
         request, categories, products_queryset)
+
+    products = search(request, products)
 
     try:
         # Try to find the maximum price from the filtered products.
@@ -180,7 +193,7 @@ class ProductListFilterAjaxView(View):
         data["products"] = render_to_string(
             "products/partials/product_partials.html", {"paginated_products": paginated_products}, request)
         data["pagination"] = render_to_string(
-            "products/partials/pagination.html", {"page_obj": paginated_products})
+            "products/partials/pagination.html", {"paginated_products": paginated_products})
         data["price_filter"] = render_to_string(
             "products/partials/price_filter.html", {
                 "start_price": response["start_price"],

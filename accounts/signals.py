@@ -1,16 +1,24 @@
+# Python
 import json
+
+# Django
 from django.contrib.auth.signals import user_logged_in
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.http import HttpRequest
 
+# Project
 from orders.models import Order, OrderItem
 from products.models import Product, ProductColorVariant
-
 from .models import User
 
 
 @receiver(user_logged_in)
-def save_cookies_data(sender, user: User, request:HttpRequest, **kwargs):
+def save_cookies_data(sender, user: User, request: HttpRequest, **kwargs):
+    """
+    Save the data was set on the user's cookies to the database
+    such as: "order" and "liked_products".
+    """
     cookies = request.COOKIES
     if order := cookies.get("order"):
         user_order, _ = Order.in_processes.get_or_create(user=user)
@@ -44,7 +52,7 @@ def save_cookies_data(sender, user: User, request:HttpRequest, **kwargs):
         try:
             liked_products = list(json.loads(liked_products))
         except:
-            return 
+            return
 
         all_products = Product.access_controlled.access_level(user)
         for liked_product in liked_products:
@@ -53,3 +61,9 @@ def save_cookies_data(sender, user: User, request:HttpRequest, **kwargs):
             except:
                 continue
             user.liked_products.add(product)
+
+
+@receiver(pre_save, sender=User)
+def activate_superuser(sender, instance, **kwargs):
+    if instance._state.adding is True and instance.is_superuser:
+        instance.is_active = True
