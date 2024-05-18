@@ -1,0 +1,22 @@
+{% load poll_extras %}
+
+{% for colored_product in product.get_color_variants %}
+    {% get_order_item_quantity colored_product user cookies as quantity %}
+    <li>
+        <a onclick="setProductColor(
+            {{colored_product.get_price}}, {{colored_product.get_discount}},
+            '{{colored_product.color.color_name}}', {{colored_product.id}},
+            {{colored_product.stock_count}}, 
+            `{% if quantity > 0 %}
+                <a class='item_add' onclick='removeFromOrder({{colored_product.id}})'>حذف از سبد خرید</a>
+            {% else %}
+                <a class='item_add' onclick='addToOrder({{colored_product.id}})'>افزودن به سبد خرید</a>
+            {% endif %}`
+            )">
+            <span id="color-{{colored_product.id}}"
+                style="background: {{colored_product.color.color_hex_code}};
+                {% if selected_color == colored_product %}border-color: blue{% endif %}"></span>
+            {{colored_product.color.color_name}}
+        </a>
+    </li>
+{% endfor %}

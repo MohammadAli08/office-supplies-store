@@ -48,7 +48,7 @@
                     </ul>
                 </div>
             </div>
-            {% with first_color=product.product_color_variants.first %}
+            {% with first_color=product.product_color_variants.first user=request.user %}
             <!-- flixslider -->
                 <script defer src="{% static 'js/jquery.flexslider.js' %}"></script>
                 <link rel="stylesheet" href="{% static 'css/flexslider.css' %}" type="text/css" media="screen" />
@@ -92,29 +92,25 @@
                     <div class="color-quality-right" dir="rtl">
                         <h5 id="colors-title">رنگ ها : ({{first_color.color.color_name}})</h5>
                         <ul id="colors">
-                            {% for colored_product in product.get_color_variants %}
-                                <li>
-                                    <a onclick="setProductColor(
-                                        {{colored_product.get_price}}, {{colored_product.get_discount}},
-                                        '{{colored_product.color.color_name}}', {{colored_product.id}},
-                                        {{colored_product.stock_count}})">
-                                        <span id="color-{{colored_product.id}}"
-                                            style="background: {{colored_product.color.color_hex_code}}; {% if forloop.first %}border-color: blue{% endif %}"></span>
-                                        {{colored_product.color.color_name}}
-                                    </a>
-                                </li>
-                            {% endfor %}
+                            {% include "products/partials/colors.html" with selected_color=first_color cookies=request.COOKIES %}
                         </ul>
                     </div>
                     <div class="clearfix"> </div>
                 </div>
                 <div class="occasion-cart">
-                    {% if request.user in product.liked_by.all or product.id in request.COOKIES.liked_products|loads %}
+                    {% if user in product.liked_by.all or product.id in request.COOKIES.liked_products|loads %}
                         <a class="item_add" id="like-product" onclick="likeOrDislikeProduct({{product.id}})"><span class="glyphicon glyphicon-heart"></span></a>
                     {% else %}
                         <a class="item_add" id="like-product" onclick="likeOrDislikeProduct({{product.id}})"><span class="glyphicon glyphicon-heart-empty"></span></a>
                     {% endif %}
-                    <a class="item_add" onclick="">افزودن به سبد خرید</a>
+                    <div id="order-btn">
+                        {% get_order_item_quantity first_color user request.COOKIES as quantity %}
+                        {% if quantity > 0 %}
+                            <a class="item_add" onclick="removeFromOrder({{first_color.id}})">حذف از سبد خرید</a>
+                        {% else %}
+                            <a class="item_add" onclick="addToOrder({{first_color.id}})">افزودن به سبد خرید</a>
+                        {% endif %}
+                    </div>
                 </div>
                 <hr/>
                 <div class="container">

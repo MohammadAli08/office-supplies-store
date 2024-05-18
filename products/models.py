@@ -165,6 +165,9 @@ class ProductColorVariant(SoftDelete):
     def get_final_price(self):
         return self.get_price() - self.get_discount()
 
+    def get_absolute_url(self):
+        return self.product.get_absolute_url()
+
     def __str__(self) -> str:
         return f"{self.product}-{self.color}"
 

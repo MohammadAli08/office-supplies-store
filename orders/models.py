@@ -1,5 +1,7 @@
 # Django
 from django.db import models
+from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 
 # Project
 from accounts.models import User
@@ -8,6 +10,15 @@ from products.models import ProductColorVariant
 # Django jalali
 from django_jalali.db import models as jmodels
 
+
+# ---------------managers---------------
+
+class InProcessesManager(jmodels.jManager):
+    def get_queryset(self) -> models.QuerySet:
+        return super().get_queryset().filter(is_paid=False)
+
+
+# ------------------models------------------
 
 class Order(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.SET_NULL,
@@ -24,6 +35,7 @@ class Order(models.Model):
     payment_date = jmodels.jDateTimeField("زمان پرداخت", blank=True, null=True)
 
     objects = jmodels.jManager()
+    in_processes = InProcessesManager()
 
     def get_final_price(self):
         total = 0
@@ -52,7 +64,8 @@ class OrderItem(models.Model):
     product = models.ForeignKey(to=ProductColorVariant, on_delete=models.deletion.CASCADE,
                                 related_name="order_items", verbose_name="نوع رنگی محصول")
 
-    quantity = models.PositiveIntegerField("تعداد", default=1)
+    quantity = models.PositiveIntegerField(
+        "تعداد", default=1, validators=[MinValueValidator(1)])
 
     paid_price = models.PositiveBigIntegerField(
         "قیمت پرداخت شده", blank=True, null=True)
@@ -61,9 +74,18 @@ class OrderItem(models.Model):
     def get_final_price(self):
         return self.quantity * (self.paid_price or self.product.get_final_price())
 
+    def clean_fields(self, exclude=None) -> None:
+        if self.quantity <= self.product.stock_count:
+            return super().clean_fields()
+        else:
+            raise ValidationError(
+                {"quantity": "تعداد نمی تواند از تعداد موجودی محصول بیشتر باشد"})
+
     def __str__(self) -> str:
         return str(self.product) + str(self.order)
 
     class Meta:
         verbose_name = "محصول سبد خرید"
         verbose_name_plural = "محصولات سبد خرید"
+
+        unique_together = ("product", "order")

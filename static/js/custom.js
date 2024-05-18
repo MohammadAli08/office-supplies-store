@@ -64,6 +64,36 @@ function showAlert(title, icon, onload) {
     }
 }
 
+async function addToOrderAlert(colors) {
+    if (Object.keys(colors).length <= 0) {
+        showAlert("این محصول در حال حاضر موجود نمی‌باشد", "error", "center");
+        return false
+    } else if (Object.keys(colors).length == 1) {
+        addToOrder(Object.keys(colors)[0])
+    }
+    const inputOptions = new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(colors);
+        }, 1000);
+    });
+    const { value: productId } = await Swal.fire({
+        title: "رنگ محصول را انتخاب کنید",
+        input: "radio",
+        confirmButtonText: "افزودن",
+        confirmButtonColor: "#00bb00",
+        inputOptions,
+        inputValidator: (value) => {
+            if (!value) {
+                return "باید یک رنگ را انتخاب کنید";
+            };
+        }
+    });
+    if (productId) {
+        console.log(productId)
+        addToOrder(productId);
+    };
+};
+
 
 // -----------products-----------
 
@@ -95,7 +125,7 @@ function setProductsFilter(data) {
     });
 }
 
-function setProductColor(price, discount, colorName, colorId, stockCount) {
+function setProductColor(price, discount, colorName, colorId, stockCount, orderBtn) {
     var priceText = `
         <span class="item_price" dir="rtl">
             ${separate(price - discount)} تومان
@@ -113,6 +143,7 @@ function setProductColor(price, discount, colorName, colorId, stockCount) {
     };
     $("#color-" + colorId).css("border-color", "blue");
     setInStockStatus(stockCount);
+    $("#order-btn").html(orderBtn)
 }
 
 function setInStockStatus(stockCount) {
@@ -139,6 +170,52 @@ function likeOrDislikeProduct(productId) {
         })
     })
 }
+
+function addToOrder(productId, quantity) {
+    $.get("/orders/add-to-order-ajax/", {
+        id: productId,
+        quantity: quantity
+    }).then(res => {
+        showAlert(res["title"], res["icon"]);
+        if (res["icon"] === "success") {
+            $("#order-btn").html(`
+                <a class="item_add" onclick="removeFromOrder(${productId})">
+                    حذف از سبد خرید
+                </a>
+            `)
+            if (res["items_count"]) {
+                $("#order-items-count").text("تعداد: "+res["items_count"])
+            }
+            if (res["colors"]) {
+                $("#colors").html(res["colors"]);
+            }
+        };
+    });
+};
+
+function removeFromOrder(productId) {
+    $.get("/orders/remove-from-order-ajax/", {
+        id: productId
+    }).then(res => {
+        showAlert(res["title"], res["icon"]);
+        if (res["icon"] === "success") {
+            $("#order-btn").html(`
+                <a class="item_add" onclick="addToOrder(${productId})">
+                    افزودن به سبد خرید
+                </a>
+            `);
+            if (res["items_count"]) {
+                $("#order-items-count").text("تعداد: "+res["items_count"])
+                $("#order-items-count-2").text(res["items_count"]+" محصول می شود")
+            } else if (res["total_price"]){
+                $("#total-price").text(separate(es["total_price"]));
+            };
+        };
+        if (res["colors"]) {
+            $("#colors").html(res["colors"]);
+        }
+    });
+};
 
 
 // --------------comments------------------

@@ -15,8 +15,12 @@
             {{product.final_price|intcomma:False}}
         </span>
         <br/>
-        <a class="item_add" href="#">
-            اضافه به سبد خرید
+        <a class="item_add" onclick="addToOrderAlert({
+            {% for colored_product in product.product_color_variants.all %}
+                {{colored_product.id}}: '{{colored_product.color.color_name}}',
+            {% endfor %}
+        })">
+            افزودن به سبد خرید
         </a>
     </p>
 </div>

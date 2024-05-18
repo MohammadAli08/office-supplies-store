@@ -64,7 +64,11 @@ def login(request):
                     # Login user.
                     login_user(request, user)
                     messages.success(request, "خوش آمدید")
-                    return redirect("home:index")
+                    response = redirect("home:index")
+                    # Delete the additional cookies.
+                    response.delete_cookie("order")
+                    response.delete_cookie("liked_products")
+                    return response
                 else:
                     messages.error(request, "حساب فعال نشده است")
         return render(request, "accounts/login.html", {"form": form})

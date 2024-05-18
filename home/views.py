@@ -7,7 +7,8 @@ from products.models import Product
 
 @require_GET
 def index(request):
-    latest_products = Product.objects.all()[:8]
+    all_products = Product.access_controlled.access_level(request.user)
+    latest_products = all_products[:8]
     context = {
         "latest_products": latest_products
     }

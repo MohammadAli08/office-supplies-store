@@ -1,0 +1,118 @@
+{% extends "shared/base.html" %}
+
+{% load humanize %}
+
+{% block title %}سبد خرید{% endblock %}
+
+{% block content %}
+
+<!-- breadcrumbs -->
+<div class="breadcrumbs">
+    <div class="container">
+        <ol class="breadcrumb breadcrumb1 animated wow slideInLeft" data-wow-delay=".5s">
+            <li><a href="{% url 'home:index' %}"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>خانه</a></li>
+            <li class="active"><span class="glyphicon glyphicon-shopping-cart" style="color: #777" aria-hidden="true"></span>سبد خرید</li>
+        </ol>
+    </div>
+</div>
+<!-- //breadcrumbs -->
+<!-- checkout -->
+<div class="checkout">
+    <div class="container" dir="rtl">
+        <h3 class="animated wow slideInLeft" data-wow-delay=".5s">سبد خرید شما شامل: <span id="order-items-count-2">{{items_count}} محصول می شود</span></h3>
+        <div class="checkout-right animated wow slideInUp" data-wow-delay=".5s">
+            <table class="timetable_sub">
+                <thead>
+                    <tr>
+                        <th>تصویر</th>
+                        <th>تعداد</th>
+                        <th>نام محصول</th>
+                        <th>تخفیف</th>
+                        <th>قیمت</th>
+                        <th>حذف؟</th>
+                    </tr>
+                </thead>
+                {% for item in items %}
+                    <tr class="rem{{forloop.counter}}">
+                        <td class="invert-image">
+                            <a href="{{item.product.get_absolute_url}}">
+                                <img src="{{item.product.product.main_image.url}}" alt=" " max_ class="img-responsive" />
+                            </a>
+                        </td>
+                        <td class="invert">
+                            <div class="quantity"> 
+                                <div class="quantity-select">                           
+                                    <div class="entry value-minus">&nbsp;</div>
+                                    <div class="entry value" product-id="{{item.product.id}}"
+                                        stock-count="{{item.product.stock_count}}">
+                                        <span>
+                                            {{item.quantity}}
+                                        </span>
+                                    </div>
+                                    <div class="entry value-plus active">&nbsp;</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="invert">
+                            {{item.product.product.title}} 
+                            به رنگ:
+                            <span class="color-icon" title="{{item.product.color.color_name}}"
+                            style="background: {{item.product.color.color_hex_code}}"></sapn>
+                        </td>
+                        <td class="invert">{{item.product.get_discount|intcomma:False}} تومان</td>
+                        <td class="invert">{{item.product.get_price|intcomma:False}} تومان</td>
+                        <td class="invert">
+                            <div class="rem">
+                                <div class="close" onclick="
+                                    removeFromOrder({{item.product.id}});
+                                    var item = $('.rem{{forloop.counter}}')
+                                    item.fadeOut('slow', function(c){
+                                        item.remove();
+                                    })
+                                  "><span class="glyphicon glyphicon-remove"></span></div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                <!--quantity-->
+                    <script>
+                    $('.value-plus').on('click', function(){
+                        var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)+1;
+                        if(newVal<=divUpd.attr("stock-count")){
+                            divUpd.text(newVal);
+                            addToOrder(divUpd.attr("product-id"), newVal)
+                        } else {
+                            showAlert("تعداد بیشتری در انبار موجود نیست", "error");
+                        }
+                    });
+
+                    $('.value-minus').on('click', function(){
+                        var divUpd = $(this).parent().find('.value'), newVal = parseInt(divUpd.text(), 10)-1;
+                        if(newVal>=1){
+                            divUpd.text(newVal);
+
+                            addToOrder(divUpd.attr("product-id"), newVal)
+                        }
+
+                    });
+                    </script>
+                <!--quantity-->
+            </table>
+        </div>
+        <div class="checkout-left">	
+            <div class="checkout-left-basket animated wow slideInLeft" data-wow-delay=".5s">
+                <h4>ادامه فرآیند خرید</h4>
+                <ul>
+                    <li><i>--</i> در مجموع<span id="total-price">{{total_price|intcomma:False}}</span></li>
+                </ul>
+            </div>
+            <div class="checkout-right-basket animated wow slideInRight" data-wow-delay=".5s">
+                <a href="{% url 'products:list' %}">ادامه خرید</a>
+            </div>
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+</div>
+<!-- //checkout -->
+
+{% endblock %}

@@ -2,6 +2,9 @@
 import json
 from django import template
 
+# Project
+from accounts.models import User
+from orders.views import get_order_from_cookie
 from products.models import Product
 
 register = template.Library()
@@ -41,4 +44,22 @@ def call_method(obj, method_name, *args, **kwargs):
 
 @register.filter()
 def loads(data):
-    return json.loads(data)
+    try:
+        return json.loads(data)
+    except:
+        return data
+
+
+@register.simple_tag()
+def get_order_item_quantity(product, user, cookies):
+    if isinstance(user, User):
+        item = product.order_items.filter(
+            order__is_paid=False, order__user=user).first()
+        return item.quantity if item else 0
+    else:
+        items, _ = get_order_from_cookie(cookies=cookies)
+        for item in items:
+            if item["product"] == product:
+                return item["quantity"]
+        else:
+            return 0

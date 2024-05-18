@@ -69,7 +69,8 @@
 }
 
 .single .occasion-cart {
-    margin-top: 10px;
+    display: block ruby;
+    margin: 5% 0 5% 0;
 }
 
 
@@ -109,4 +110,15 @@
 
 #in-stock-status .few-in-stock {
     color: red;
+}
+
+
+.color-icon {
+    border: 1px solid;
+    border-radius: 30%;
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    margin-top: 4px;
+    cursor: wait;
 }
