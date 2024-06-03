@@ -1,0 +1,20 @@
+<!-- user panel menu -->
+
+<div class="col-md-3">
+    <div class="list-group text-center user-panel-menu">
+        <a href="" class="list-group-item 
+            {% if request.resolver_match.view_name == 'user_panels:dashboard' %}
+                active {% endif %}">
+            داشبورد
+        </a>
+        <a href="" class="list-group-item">
+            ویرایش اطلاعات
+        </a>
+        <a href="" class="list-group-item">
+            تغییر کلمه عبور
+        </a>
+        <a href="" class="list-group-item">
+            سفارش ها
+        </a>
+    </div>
+</div>

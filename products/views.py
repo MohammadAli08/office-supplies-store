@@ -108,7 +108,7 @@ def paginate_products(request, products):
     page_number = request.GET.get("page", 1)
 
     # Create Paginator object.
-    paginator = Paginator(products, 1)
+    paginator = Paginator(products, per_page)
     # Get the selected page.
     try:
         page_obj = paginator.get_page(page_number)

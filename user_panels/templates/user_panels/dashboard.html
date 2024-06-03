@@ -1,0 +1,50 @@
+{% extends "shared/base.html" %}
+
+{% block title %}داشبورد{% endblock %}
+
+
+{% block content %}
+
+<!-- breadcrumbs -->
+	<div class="breadcrumbs">
+		<div class="container">
+			<ol class="breadcrumb breadcrumb1 animated wow slideInLeft" data-wow-delay=".5s">
+				<li><a href="{% url 'home:index' %}"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>خانه</a></li>
+				<li class="active">داشبورد</li>
+			</ol>
+		</div>
+	</div>
+<!-- //breadcrumbs -->
+<!-- dashboard -->
+	<div class="dashboard">
+		<div class="container">
+			<div class="col-md-9">
+				<h2 class="page-header text-center">
+					<bi>داشبورد</bi>
+				</h2>
+				<div class="col-xs-3 thumbnail">
+					<img src="{{ user.photo.url }}" alt="">
+				</div>
+				<div class="col-xs-9 user-information">
+					<div class="text-right">
+						<h4>
+							<i>نام کاربری:</i> 
+							<b>{{ user.username }}</b>
+						</h4>
+						<h4>
+							<i>نام:</i>
+							<b>{{ user.first_name|default:"تنظیم نشده" }}</b>
+						</h4>
+						<h4>
+							<i>نام خانوادگی:</i>
+							<b>{{ user.last_name|default:"تنظیم نشده" }}</b>
+						</h4>
+					</div>
+				</div>
+			</div>
+			{% include "user_panels/partials/menu.html" %}
+		</div>
+	</div>
+<!-- //dashboard -->
+
+{% endblock %}

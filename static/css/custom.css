@@ -122,3 +122,19 @@
     margin-top: 4px;
     cursor: wait;
 }
+
+.user-panel-menu {
+    margin-top: 5rem;
+}
+
+.dashboard {
+    direction: rtl;
+}
+
+.dashboard .user-information h4 {
+    margin-top: 10px;
+}
+
+.dashboard .user-information b {
+    margin-right: 15px;
+}

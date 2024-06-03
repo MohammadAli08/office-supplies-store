@@ -13,6 +13,13 @@
                                 خروج
                             </a>
                         </li>
+                        <li {% if request.resolver_match.app_name == "user_panels" %}
+                            class="active" {% endif %}>
+                            <i class="glyphicon glyphicon-user" aria-hidden="true"></i>
+                            <a href="{% url 'user_panels:dashboard' %}">
+                                پنل کاربری
+                            </a>
+                        </li>
                         {% if request.user.is_superuser %}
                             <li>
                                 <i class="glyphicon glyphicon-cog" aria-hidden="true"></i>
@@ -22,11 +29,13 @@
                             </li>
                         {% endif %}
                     {% else %}
-                        <li>
+                        <li {% if request.resolver_match.view_name == "accounts:login" %}
+                            class="active" {% endif %}>
                             <i class="glyphicon glyphicon-log-in" aria-hidden="true"></i>
                             <a href="{% url 'accounts:login' %}">ورود</a>
                         </li>
-                        <li>
+                        <li {% if request.resolver_match.view_name == "accounts:register" %}
+                            class="active" {% endif %}>
                             <i class="glyphicon glyphicon-book" aria-hidden="true"></i>
                         <a href="{% url 'accounts:register' %}">ثبت نام</a></li>
                     {% endif %}
